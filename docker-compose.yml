@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  message-generator:
+    build: messageGenerator/.
+    container_name: message-generator
+    volumes:
+      - ./messageGenerator/src:/app/src
+      - ./messageGenerator/images:/app/images
+    command: sh -c "javac /app/src/main/java/com/example/MessageGenerator.java -d /app/out && java -cp /app/out com.example.MessageGenerator"
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
