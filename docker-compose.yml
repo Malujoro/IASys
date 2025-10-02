@@ -1,6 +1,21 @@
 version: "3.9"
 
 services:
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"     # Porta AMQP para comunicação entre serviços
+      - "15672:15672"   # Porta para acessar o painel de administração
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app-net
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   message-generator:
     build: messageGenerator/.
     container_name: message-generator
@@ -8,9 +23,14 @@ services:
       - ./messageGenerator/src:/app/src
       - ./messageGenerator/images:/app/images
     command: sh -c "javac /app/src/main/java/com/example/MessageGenerator.java -d /app/out && java -cp /app/out com.example.MessageGenerator"
+    depends_on:
+      - rabbitmq
     networks:
       - app-net
 
 networks:
   app-net:
     driver: bridge
+
+volumes:
+  rabbitmq_data:
