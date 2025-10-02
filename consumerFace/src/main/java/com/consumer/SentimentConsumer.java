@@ -3,6 +3,9 @@ package com.consumer;
 import com.rabbitmq.client.*;
 import java.nio.charset.StandardCharsets;
 
+import smile.classification.SVM;
+import smile.math.kernel.LinearKernel;
+
 public class SentimentConsumer {
     private final static String EXCHANGE_NAME = "images";
 
@@ -35,5 +38,6 @@ public class SentimentConsumer {
     private static double[] convertToFeatures(byte[] body) {
         // Implemente a conversão de byte[] para double[] aqui
         // Isso depende de como seus dados estão estruturados
+        return new double[0];
     }
 }
