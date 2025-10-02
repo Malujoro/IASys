@@ -1,11 +1,13 @@
 package com.consumer;
 
-import smile.classification.SVM;
-import smile.math.kernel.LinearKernel;
-import smile.io.Serialization;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import smile.classification.SVM;
+import smile.math.kernel.LinearKernel;
 
 public class TrainSentimentModel {
 
@@ -31,11 +33,15 @@ public class TrainSentimentModel {
         int[] y = labelsList.stream().mapToInt(i -> i).toArray();
 
         // Treina SVM
-        SVM<double[]> svm = SVM.fit(X, y, new LinearKernel(), 1.0);
+        double C = 1.0;
+        SVM<double[]> svm = SVM.fit(X, y, new LinearKernel(), C, 1e-3);
 
         // Salva o modelo
-        Serialization.write(svm, "src/main/resources/model_sentiment.bin");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/main/resources/model_sentiment.bin"))) {
+            oos.writeObject(svm);
+        }
 
         System.out.println("Modelo treinado e salvo com sucesso!");
     }
 }
+

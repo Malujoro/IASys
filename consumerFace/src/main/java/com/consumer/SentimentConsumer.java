@@ -18,15 +18,22 @@ public class SentimentConsumer {
             // Só consome mensagens com routing key "face"
             channel.queueBind(queueName, EXCHANGE_NAME, "face");
 
-            SentimentModel model = new SentimentModel("src/main/resources/model_sentiment.bin");
+            SVM<double[]> model = (SVM<double[]>) SentimentModel.loadModel("sentiment.model");
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 byte[] body = delivery.getBody();
-                String result = model.predict(body);
-                System.out.println("[Sentimento Detectado] " + result);
+                // Aqui você precisa converter 'body' para o formato de características esperado pelo modelo
+                double[] features = convertToFeatures(body);
+                int prediction = model.predict(features);
+                System.out.println("[Sentimento Detectado] " + prediction);
             };
 
             channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
         }
+    }
+
+    private static double[] convertToFeatures(byte[] body) {
+        // Implemente a conversão de byte[] para double[] aqui
+        // Isso depende de como seus dados estão estruturados
     }
 }
