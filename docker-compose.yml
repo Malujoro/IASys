@@ -16,6 +16,17 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  rabbit-init:
+    build: RabbitMQ/.
+    container_name: rabbit-init
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./RabbitMQ:/app
+      - ./libs:/app/libs
+    networks:
+      - app-net
+
   message-generator:
     build: messageGenerator/.
     container_name: message-generator
