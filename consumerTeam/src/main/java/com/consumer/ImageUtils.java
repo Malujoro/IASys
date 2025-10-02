@@ -1,29 +1,24 @@
 package com.consumer;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class ImageUtils {
-    // reduz a imagem para 32x32 e converte em vetor de double
-    public static double[] extractFeatures(File file) throws IOException {
+
+    public static double[] imageToVector(File file, int width, int height) throws Exception {
         BufferedImage img = ImageIO.read(file);
-        BufferedImage resized = new BufferedImage(32, 32, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+        scaled.getGraphics().drawImage(img, 0, 0, width, height, null);
 
-        Graphics2D g = resized.createGraphics();
-        g.drawImage(img, 0, 0, 32, 32, null);
-        g.dispose();
-
-        double[] features = new double[32 * 32];
-        for (int y = 0; y < 32; y++) {
-            for (int x = 0; x < 32; x++) {
-                int rgb = resized.getRGB(x, y);
-                int gray = rgb & 0xFF;
-                features[y * 32 + x] = gray / 255.0; // normalizar
+        double[] vector = new double[width * height];
+        int idx = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel = scaled.getRGB(x, y) & 0xFF; // grayscale
+                vector[idx++] = pixel / 255.0; // normaliza entre 0 e 1
             }
         }
-        return features;
+        return vector;
     }
 }
