@@ -31,10 +31,8 @@ services:
     build: messageGenerator/.
     container_name: message-generator
     volumes:
-      - ./messageGenerator/src:/app/src
-      - ./messageGenerator/images:/app/images
-      - ./libs:/app/libs
-    command: sh -c "javac -cp /app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar -d /app/out /app/src/main/java/com/example/MessageGenerator.java && java -cp /app/out:/app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar com.example.MessageGenerator"
+      - ./Dataset.aliens:/app/images/pessoas
+      - ./Dataset_times:/app/images/times
     depends_on:
       - rabbitmq
     networks:

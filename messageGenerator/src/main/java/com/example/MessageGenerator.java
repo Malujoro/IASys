@@ -1,5 +1,9 @@
 package com.example;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
 import java.io.File;
 import java.util.Random;
 
@@ -8,24 +12,40 @@ public class MessageGenerator {
     private static final File[] rostos;
     private static final File[] times;
 
+    private static final String QUEUE_NAME = "mensagens";
+
     static {
         rostos = new File("/app/images/pessoas").listFiles();
         times = new File("/app/images/times").listFiles();
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        int messagesPerSecond = 5;
-        long delay = 1000 / messagesPerSecond;
+    public static void main(String[] args) throws Exception {
+        // Conectar no RabbitMQ
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("rabbitmq"); // nome do container RabbitMQ no docker-compose
+        factory.setUsername("guest");
+        factory.setPassword("guest");
 
-        while (true) {
-            String message = generateMessage();
-            System.out.println("[MSG] " + message);
-            Thread.sleep(delay);
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+
+            // Cria fila se não existir
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+
+            int messagesPerSecond = 5;
+            long delay = 1000 / messagesPerSecond;
+
+            while (true) {
+                String message = generateMessage();
+                // Envia para a fila
+                channel.basicPublish("", QUEUE_NAME, null, message.getBytes("UTF-8"));
+                System.out.println("[ENVIADO] " + message);
+                Thread.sleep(delay);
+            }
         }
     }
 
     private static String generateMessage() {
-        // Escolhe tipo aleatório
         boolean tipoPessoa = random.nextBoolean();
         String imagemEscolhida;
 
