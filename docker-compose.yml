@@ -16,13 +16,25 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  rabbit-init:
+    build: RabbitMQ/.
+    container_name: rabbit-init
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./RabbitMQ:/app
+      - ./libs:/app/libs
+    networks:
+      - app-net
+
   message-generator:
     build: messageGenerator/.
     container_name: message-generator
     volumes:
       - ./messageGenerator/src:/app/src
       - ./messageGenerator/images:/app/images
-    command: sh -c "javac /app/src/main/java/com/example/MessageGenerator.java -d /app/out && java -cp /app/out com.example.MessageGenerator"
+      - ./libs:/app/libs
+    command: sh -c "javac -cp /app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar -d /app/out /app/src/main/java/com/example/MessageGenerator.java && java -cp /app/out:/app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar com.example.MessageGenerator"
     depends_on:
       - rabbitmq
     networks:
