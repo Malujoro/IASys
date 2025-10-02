@@ -1,13 +1,11 @@
-version: "3.9"
-
 services:
   rabbitmq:
     image: rabbitmq:3.11-management
     container_name: rabbitmq
     hostname: rabbitmq
     ports:
-      - "5672:5672"     # Porta AMQP para comunicação entre serviços
-      - "15672:15672"   # Porta para acessar o painel de administração
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -17,7 +15,7 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
 
   rabbit-init:
-    build: RabbitMQ/.
+    build: ./RabbitMQ
     container_name: rabbit-init
     depends_on:
       - rabbitmq
@@ -33,6 +31,25 @@ services:
     volumes:
       - ./Dataset.aliens:/app/images/pessoas
       - ./Dataset_times:/app/images/times
+      - ./libs:/app/libs
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-net
+
+  face-consumer:
+    build: ./RabbitMQ
+    container_name: face-consumer
+    command: sh -c "javac -cp /app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar -d /app/out /app/com/example/FaceConsumer.java && java -cp /app/out:/app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar com.example.FaceConsumer"
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-net
+
+  team-consumer:
+    build: ./RabbitMQ
+    container_name: team-consumer
+    command: sh -c "javac -cp /app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar -d /app/out /app/com/example/TeamConsumer.java && java -cp /app/out:/app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar com.example.TeamConsumer"
     depends_on:
       - rabbitmq
     networks:
