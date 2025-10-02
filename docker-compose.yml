@@ -20,9 +20,8 @@ services:
     build: messageGenerator/.
     container_name: message-generator
     volumes:
-      - ./messageGenerator/src:/app/src
-      - ./messageGenerator/images:/app/images
-    command: sh -c "javac /app/src/main/java/com/example/MessageGenerator.java -d /app/out && java -cp /app/out com.example.MessageGenerator"
+      - ./Dataset.aliens:/app/images/pessoas
+      - ./Dataset_times:/app/images/times
     depends_on:
       - rabbitmq
     networks:
