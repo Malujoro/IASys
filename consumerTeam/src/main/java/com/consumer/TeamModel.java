@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 public class TeamModel {
     private LogisticRegression classifier;
@@ -21,8 +23,8 @@ public class TeamModel {
         }
     }
 
-    public String predict(File imageFile) throws Exception {
-        BufferedImage img = ImageIO.read(imageFile);
+    public String predict(BufferedImage imageFile) throws Exception {
+        BufferedImage img = imageFile;
         BufferedImage resized = new BufferedImage(28, 28, BufferedImage.TYPE_BYTE_GRAY);
 
         Graphics2D g = resized.createGraphics();
