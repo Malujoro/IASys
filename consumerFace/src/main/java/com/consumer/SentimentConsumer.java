@@ -51,13 +51,16 @@ public class SentimentConsumer {
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
                 String prediction = model.predict(img);
                 System.out.println("[Sentimento Esperado] " + nomeArquivo + " | " + "[Sentimento Detectado]" + prediction);
+                Thread.sleep(5000);
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }  catch (Exception e) {
                 System.err.println("Erro ao processar a imagem: " + e.getMessage());
                 e.printStackTrace();
             }
         };
 
-        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> {});
+        channel.basicQos(1);
+        channel.basicConsume(QUEUE_NAME, false, deliverCallback, consumerTag -> {});
 
         System.out.println("Consumidor pronto, aguardando mensagens na fila 'face'...");
     }

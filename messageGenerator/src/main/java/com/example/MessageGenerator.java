@@ -41,7 +41,7 @@ public class MessageGenerator {
                 channel.queueBind("fila_face", exchangeName, "face");
                 channel.queueBind("fila_team", exchangeName, "team");
 
-                int messagesPerSecond = 5;
+                int messagesPerSecond = 10;
                 long delay = 1000 / messagesPerSecond;
 
                 while (true) {
