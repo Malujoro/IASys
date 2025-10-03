@@ -2,6 +2,7 @@ package com.consumer;
 
 import com.rabbitmq.client.*;
 import java.nio.charset.StandardCharsets;
+import java.io.File;
 
 public class TeamConsumer {
     private final static String EXCHANGE_NAME = "images";
@@ -22,8 +23,16 @@ public class TeamConsumer {
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 byte[] body = delivery.getBody();
-                String result = model.predict(body);
-                System.out.println("[Time Detectado] " + result);
+                // String com.consumer.TeamModel.predict(File imageFile) throws Exception
+                File file = new File("src/main/resources/dataset_times/" + new String(body, StandardCharsets.UTF_8));
+
+                try {
+                    String result = model.predict(file);
+                    System.out.println("[Time Detectado] " + result);
+                } catch (Exception e) {
+                    System.err.println("Error predicting team: " + e.getMessage());
+                    e.printStackTrace();
+                }
             };
 
             channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
