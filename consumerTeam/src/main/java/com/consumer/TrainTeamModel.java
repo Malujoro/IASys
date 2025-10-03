@@ -11,6 +11,8 @@ public class TrainTeamModel {
         String datasetPath = "src/main/resources/dataset_times/";
         String labelsFile = datasetPath + "labels.csv";
 
+        int numClasses = 8;
+
         List<double[]> featuresList = new ArrayList<>();
         List<Integer> labelsList = new ArrayList<>();
 
@@ -21,17 +23,33 @@ public class TrainTeamModel {
                 String filename = parts[0];
                 int label = Integer.parseInt(parts[1]);
 
-                double[] features = ImageUtils.imageToVector(new File(datasetPath + filename), 28, 28);
+                File imgFile = new File(datasetPath + filename);
+                if (!imgFile.exists()) {
+                    System.err.println("Arquivo de imagem não encontrado: " + imgFile.getAbsolutePath());
+                    continue;
+                }
+
+                if (label < 0 || label >= numClasses) {
+                    System.err.println("Rótulo inválido para arquivo " + filename + ": " + label);
+                    continue;
+                }
+
+                double[] features = ImageUtils.imageToVector(imgFile, 28, 28);
                 featuresList.add(features);
                 labelsList.add(label);
             }
         }
 
+        if (featuresList.isEmpty()) {
+            System.err.println("Nenhum dado válido para treinar o modelo.");
+            return;
+        }
+
         double[][] features = featuresList.toArray(new double[0][]);
         int[] labels = labelsList.stream().mapToInt(i -> i).toArray();
 
-        double C = 2.0;
-        int numClasses = 8;
+
+        double C = 1.0;
         SVM<double[]> svm = SVM.fit(features, labels, new LinearKernel(), C, 1e-3);
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/main/resources/model_team.bin"))) {
