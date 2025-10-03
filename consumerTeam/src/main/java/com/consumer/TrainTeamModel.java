@@ -2,7 +2,6 @@ package com.consumer;
 
 import smile.classification.SVM;
 import smile.math.kernel.LinearKernel;
-import smile.util.ModelSerializer;
 
 import java.io.*;
 import java.util.*;
@@ -22,7 +21,7 @@ public class TrainTeamModel {
                 String filename = parts[0];
                 int label = Integer.parseInt(parts[1]);
 
-                double[] features = ImageUtils.extractFeatures(new File(datasetPath + filename));
+                double[] features = ImageUtils.imageToVector(new File(datasetPath + filename), 28, 28);
                 featuresList.add(features);
                 labelsList.add(label);
             }
@@ -31,11 +30,13 @@ public class TrainTeamModel {
         double[][] features = featuresList.toArray(new double[0][]);
         int[] labels = labelsList.stream().mapToInt(i -> i).toArray();
 
-        SVM<double[]> svm = new SVM<>(new LinearKernel(), 2.0, 8); // 8 classes
-        svm.learn(features, labels);
-        svm.finish();
+        double C = 2.0;
+        int numClasses = 8;
+        SVM<double[]> svm = SVM.fit(features, labels, new LinearKernel(), C, 1e-3);
 
-        ModelSerializer.save(svm, "src/main/resources/model_team.bin");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/main/resources/model_team.bin"))) {
+            oos.writeObject(svm);
+        }
         System.out.println("Modelo treinado e salvo em model_team.bin");
     }
 }

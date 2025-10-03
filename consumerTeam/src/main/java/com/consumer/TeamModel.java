@@ -1,19 +1,23 @@
 package com.consumer;
 
 import smile.classification.SVM;
-import smile.util.ModelSerializer;
 
 import java.io.ByteArrayInputStream;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 
 public class TeamModel {
     private SVM<double[]> classifier;
 
     public TeamModel(String modelPath) {
         try {
-            classifier = ModelSerializer.load(new java.io.File(modelPath));
+            // Desserialização padrão Java
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(modelPath))) {
+                classifier = (SVM<double[]>) ois.readObject();
+            }
         } catch (Exception e) {
             throw new RuntimeException("Erro ao carregar modelo: " + e.getMessage(), e);
         }
