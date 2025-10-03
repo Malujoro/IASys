@@ -13,6 +13,11 @@ services:
       - app-net
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   message-generator:
     build: messageGenerator/.

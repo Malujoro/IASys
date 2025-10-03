@@ -15,8 +15,6 @@ public class MessageGenerator {
     private static final File[] rostos;
     private static final File[] times;
 
-    private static final String QUEUE_NAME = "mensagens";
-
     static {
         rostos = new File("/app/images/pessoas").listFiles();
         times = new File("/app/images/times").listFiles();
@@ -35,14 +33,24 @@ public class MessageGenerator {
                 String exchangeName = "images";
                 channel.exchangeDeclare(exchangeName, "topic");
 
+                // Cria filas
+                channel.queueDeclare("fila_face", true, false, false, null);
+                channel.queueDeclare("fila_team", true, false, false, null);
+
+                // Faz o bind da fila com a exchange e routing key
+                channel.queueBind("fila_face", exchangeName, "face");
+                channel.queueBind("fila_team", exchangeName, "team");
+
                 int messagesPerSecond = 5;
                 long delay = 1000 / messagesPerSecond;
 
                 while (true) {
-                    String message = generateMessage();
+                    String[] resultado = generateMessage();
+                    String message = resultado[0];     // Base64
+                    String nomeArquivo = resultado[1]; // nome do arquivo
 
                     String routingKey;
-                    if (message.contains("feliz") || message.contains("triste")) {
+                    if (nomeArquivo.contains("feliz") || nomeArquivo.contains("triste")) {
                         routingKey = "face";  // é rosto de pessoa
                     } else {
                         routingKey = "team";  // é brasão de time
@@ -59,21 +67,22 @@ public class MessageGenerator {
         }
     }
 
-    private static String generateMessage() throws Exception {
+    private static String[] generateMessage() throws Exception {
         boolean tipoPessoa = random.nextBoolean();
         File imagemArquivo;
 
         if (tipoPessoa) {
             imagemArquivo = rostos[random.nextInt(rostos.length)];
-            System.out.println("Tipo: Rosto de pessoa | Imagem: " + imagemArquivo.getName() + " | Timestamp: " + System.currentTimeMillis());
         } else {
             imagemArquivo = times[random.nextInt(times.length)];
-            System.out.println("Tipo: Brasão de time | Imagem: " + imagemArquivo.getName() + " | Timestamp: " + System.currentTimeMillis());
         }
+
+        String nomeArquivo = imagemArquivo.getName();
+        System.out.println("Imagem: " + nomeArquivo + " | Timestamp: " + System.currentTimeMillis());
 
         byte[] bytes = Files.readAllBytes(imagemArquivo.toPath());
         String base64 = Base64.getEncoder().encodeToString(bytes);
 
-        return base64;
+        return new String[] {base64, nomeArquivo};
     }
 }
