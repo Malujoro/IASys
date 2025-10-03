@@ -27,19 +27,26 @@ public class MessageGenerator {
         factory.setPassword("guest");
 
         try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
-
-            // Cria fila se não existir
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        Channel channel = connection.createChannel()) {
+            String exchangeName = "images";
+            channel.exchangeDeclare(exchangeName, "topic");
 
             int messagesPerSecond = 5;
             long delay = 1000 / messagesPerSecond;
 
             while (true) {
                 String message = generateMessage();
-                // Envia para a fila
-                channel.basicPublish("", QUEUE_NAME, null, message.getBytes("UTF-8"));
+
+                String routingKey;
+                if (message.contains("feliz") || message.contains("triste")) {
+                    routingKey = "face";  // é rosto de pessoa
+                } else {
+                    routingKey = "team";  // é brasão de time
+                }
+
+                channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
                 System.out.println("[ENVIADO] " + message);
+
                 Thread.sleep(delay);
             }
         }
