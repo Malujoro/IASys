@@ -27,6 +27,19 @@ services:
       - app-net
     restart: on-failure
 
+  consumer-face:
+    build: consumerFace/.
+    container_name: consumer-face
+    volumes:
+      - ./consumerFace/src/main/resources:/app/src/main/resources
+      - ~/.m2:/root/.m2
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-net
+    restart: on-failure
+
+
 networks:
   app-net:
     driver: bridge

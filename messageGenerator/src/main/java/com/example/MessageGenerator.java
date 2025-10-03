@@ -7,6 +7,9 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.File;
 import java.util.Random;
 
+import java.nio.file.Files;
+import java.util.Base64;
+
 public class MessageGenerator {
     private static final Random random = new Random();
     private static final File[] rostos;
@@ -46,7 +49,6 @@ public class MessageGenerator {
                     }
 
                     channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
-                    System.out.println("[ENVIADO] " + message);
 
                     Thread.sleep(delay);
                 }
@@ -57,16 +59,21 @@ public class MessageGenerator {
         }
     }
 
-    private static String generateMessage() {
+    private static String generateMessage() throws Exception {
         boolean tipoPessoa = random.nextBoolean();
-        String imagemEscolhida;
+        File imagemArquivo;
 
         if (tipoPessoa) {
-            imagemEscolhida = rostos[random.nextInt(rostos.length)].getName();
-            return "Tipo: Rosto de pessoa | Imagem: " + imagemEscolhida + " | Timestamp: " + System.currentTimeMillis();
+            imagemArquivo = rostos[random.nextInt(rostos.length)];
+            System.out.println("Tipo: Rosto de pessoa | Imagem: " + imagemArquivo.getName() + " | Timestamp: " + System.currentTimeMillis());
         } else {
-            imagemEscolhida = times[random.nextInt(times.length)].getName();
-            return "Tipo: Brasão de time | Imagem: " + imagemEscolhida + " | Timestamp: " + System.currentTimeMillis();
+            imagemArquivo = times[random.nextInt(times.length)];
+            System.out.println("Tipo: Brasão de time | Imagem: " + imagemArquivo.getName() + " | Timestamp: " + System.currentTimeMillis());
         }
+
+        byte[] bytes = Files.readAllBytes(imagemArquivo.toPath());
+        String base64 = Base64.getEncoder().encodeToString(bytes);
+
+        return base64;
     }
 }

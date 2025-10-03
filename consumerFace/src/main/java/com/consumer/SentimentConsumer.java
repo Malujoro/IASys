@@ -6,6 +6,11 @@ import java.nio.charset.StandardCharsets;
 import smile.classification.SVM;
 import smile.math.kernel.LinearKernel;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
+
 public class SentimentConsumer {
     private final static String EXCHANGE_NAME = "images";
 
@@ -13,7 +18,7 @@ public class SentimentConsumer {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("rabbitmq"); // nome do container RabbitMQ
         try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
+            Channel channel = connection.createChannel()) {
 
             channel.exchangeDeclare(EXCHANGE_NAME, "topic");
             String queueName = channel.queueDeclare().getQueue();
@@ -21,23 +26,27 @@ public class SentimentConsumer {
             // Só consome mensagens com routing key "face"
             channel.queueBind(queueName, EXCHANGE_NAME, "face");
 
-            SVM<double[]> model = (SVM<double[]>) SentimentModel.loadModel("sentiment.model");
+            SentimentModel model = new SentimentModel("/app/src/main/resources/model_sentiment.bin");
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                byte[] body = delivery.getBody();
-                // Aqui você precisa converter 'body' para o formato de características esperado pelo modelo
-                double[] features = convertToFeatures(body);
-                int prediction = model.predict(features);
-                System.out.println("[Sentimento Detectado] " + prediction);
+                try {
+                    byte[] body = delivery.getBody();
+
+                    // Decodifica Base64 enviado pelo gerador
+                    String base64 = new String(body);
+                    byte[] imageBytes = Base64.getDecoder().decode(base64);
+
+                    // Converte para BufferedImage
+                    BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+                    String prediction = model.predict(img);
+                    System.out.println("[Sentimento Detectado] " + prediction);
+                }  catch (Exception e) {
+                    System.err.println("Erro ao processar a imagem: " + e.getMessage());
+                    e.printStackTrace();
+                }
             };
 
             channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
         }
-    }
-
-    private static double[] convertToFeatures(byte[] body) {
-        // Implemente a conversão de byte[] para double[] aqui
-        // Isso depende de como seus dados estão estruturados
-        return new double[0];
     }
 }
