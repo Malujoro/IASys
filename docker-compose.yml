@@ -14,46 +14,18 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  rabbit-init:
-    build: ./RabbitMQ
-    container_name: rabbit-init
-    depends_on:
-      - rabbitmq
-    volumes:
-      - ./RabbitMQ:/app
-      - ./libs:/app/libs
-    networks:
-      - app-net
-
   message-generator:
     build: messageGenerator/.
     container_name: message-generator
     volumes:
-      - ./Dataset.aliens:/app/images/pessoas
+      - ./Dataset_aliens:/app/images/pessoas
       - ./Dataset_times:/app/images/times
       - ./libs:/app/libs
     depends_on:
       - rabbitmq
     networks:
       - app-net
-
-  face-consumer:
-    build: ./RabbitMQ
-    container_name: face-consumer
-    command: sh -c "javac -cp /app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar -d /app/out /app/com/example/FaceConsumer.java && java -cp /app/out:/app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar com.example.FaceConsumer"
-    depends_on:
-      - rabbitmq
-    networks:
-      - app-net
-
-  team-consumer:
-    build: ./RabbitMQ
-    container_name: team-consumer
-    command: sh -c "javac -cp /app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar -d /app/out /app/com/example/TeamConsumer.java && java -cp /app/out:/app/libs/amqp-client-5.20.0.jar:/app/libs/slf4j-api-2.0.7.jar:/app/libs/slf4j-simple-2.0.7.jar com.example.TeamConsumer"
-    depends_on:
-      - rabbitmq
-    networks:
-      - app-net
+    restart: on-failure
 
 networks:
   app-net:

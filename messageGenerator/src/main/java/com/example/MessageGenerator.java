@@ -26,21 +26,33 @@ public class MessageGenerator {
         factory.setUsername("guest");
         factory.setPassword("guest");
 
-        try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
+        while(true) {
+            try (Connection connection = factory.newConnection();
+            Channel channel = connection.createChannel()) {
+                String exchangeName = "images";
+                channel.exchangeDeclare(exchangeName, "topic");
 
-            // Cria fila se não existir
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+                int messagesPerSecond = 5;
+                long delay = 1000 / messagesPerSecond;
 
-            int messagesPerSecond = 5;
-            long delay = 1000 / messagesPerSecond;
+                while (true) {
+                    String message = generateMessage();
 
-            while (true) {
-                String message = generateMessage();
-                // Envia para a fila
-                channel.basicPublish("", QUEUE_NAME, null, message.getBytes("UTF-8"));
-                System.out.println("[ENVIADO] " + message);
-                Thread.sleep(delay);
+                    String routingKey;
+                    if (message.contains("feliz") || message.contains("triste")) {
+                        routingKey = "face";  // é rosto de pessoa
+                    } else {
+                        routingKey = "team";  // é brasão de time
+                    }
+
+                    channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
+                    System.out.println("[ENVIADO] " + message);
+
+                    Thread.sleep(delay);
+                }
+            } catch (Exception e) {
+                System.out.println("RabbitMQ não disponível ainda...");
+                Thread.sleep(3000);
             }
         }
     }
