@@ -26,28 +26,33 @@ public class MessageGenerator {
         factory.setUsername("guest");
         factory.setPassword("guest");
 
-        try (Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel()) {
-            String exchangeName = "images";
-            channel.exchangeDeclare(exchangeName, "topic");
+        while(true) {
+            try (Connection connection = factory.newConnection();
+            Channel channel = connection.createChannel()) {
+                String exchangeName = "images";
+                channel.exchangeDeclare(exchangeName, "topic");
 
-            int messagesPerSecond = 5;
-            long delay = 1000 / messagesPerSecond;
+                int messagesPerSecond = 5;
+                long delay = 1000 / messagesPerSecond;
 
-            while (true) {
-                String message = generateMessage();
+                while (true) {
+                    String message = generateMessage();
 
-                String routingKey;
-                if (message.contains("feliz") || message.contains("triste")) {
-                    routingKey = "face";  // é rosto de pessoa
-                } else {
-                    routingKey = "team";  // é brasão de time
+                    String routingKey;
+                    if (message.contains("feliz") || message.contains("triste")) {
+                        routingKey = "face";  // é rosto de pessoa
+                    } else {
+                        routingKey = "team";  // é brasão de time
+                    }
+
+                    channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
+                    System.out.println("[ENVIADO] " + message);
+
+                    Thread.sleep(delay);
                 }
-
-                channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
-                System.out.println("[ENVIADO] " + message);
-
-                Thread.sleep(delay);
+            } catch (Exception e) {
+                System.out.println("RabbitMQ não disponível ainda...");
+                Thread.sleep(3000);
             }
         }
     }
