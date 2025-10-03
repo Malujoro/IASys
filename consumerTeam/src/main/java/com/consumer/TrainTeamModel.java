@@ -1,7 +1,6 @@
 package com.consumer;
 
-import smile.classification.SVM;
-import smile.math.kernel.LinearKernel;
+import smile.classification.LogisticRegression;
 
 import java.io.*;
 import java.util.*;
@@ -48,12 +47,14 @@ public class TrainTeamModel {
         double[][] features = featuresList.toArray(new double[0][]);
         int[] labels = labelsList.stream().mapToInt(i -> i).toArray();
 
+        System.out.println("labels: " + Arrays.toString(labels));
+        System.out.println("features: " + Arrays.toString(features));
 
-        double C = 1.0;
-        SVM<double[]> svm = SVM.fit(features, labels, new LinearKernel(), C, 1e-3);
+        // Troque SVM por LogisticRegression para multiclasses
+        LogisticRegression model = LogisticRegression.fit(features, labels);
 
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("src/main/resources/model_team.bin"))) {
-            oos.writeObject(svm);
+            oos.writeObject(model);
         }
         System.out.println("Modelo treinado e salvo em model_team.bin");
     }
