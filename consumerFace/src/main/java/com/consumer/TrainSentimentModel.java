@@ -12,8 +12,13 @@ import smile.math.kernel.LinearKernel;
 public class TrainSentimentModel {
 
     public static void main(String[] args) throws Exception {
-        File datasetDir = new File("src/main/resources/dataset_sentimento");
+        File datasetDir = new File("src/main/resources/dataset_sentiment");
         File[] files = datasetDir.listFiles();
+
+        if (files == null || files.length == 0) {
+            System.err.println("Diretório de dataset não encontrado ou vazio: " + datasetDir.getAbsolutePath());
+            return;
+        }
 
         List<double[]> featuresList = new ArrayList<>();
         List<Integer> labelsList = new ArrayList<>();
@@ -25,7 +30,7 @@ public class TrainSentimentModel {
             if (file.getName().toLowerCase().contains("feliz")) {
                 labelsList.add(1);
             } else {
-                labelsList.add(0); // triste
+                labelsList.add(-1); // triste (SVM espera -1/+1)
             }
         }
 
