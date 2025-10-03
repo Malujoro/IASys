@@ -7,12 +7,13 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.File;
 import java.util.Random;
 
+import java.nio.file.Files;
+import java.util.Base64;
+
 public class MessageGenerator {
     private static final Random random = new Random();
     private static final File[] rostos;
     private static final File[] times;
-
-    private static final String QUEUE_NAME = "mensagens";
 
     static {
         rostos = new File("/app/images/pessoas").listFiles();
@@ -32,6 +33,14 @@ public class MessageGenerator {
                 String exchangeName = "images";
                 channel.exchangeDeclare(exchangeName, "topic");
 
+                // Cria filas
+                channel.queueDeclare("fila_face", true, false, false, null);
+                channel.queueDeclare("fila_team", true, false, false, null);
+
+                // Faz o bind da fila com a exchange e routing key
+                channel.queueBind("fila_face", exchangeName, "face");
+                channel.queueBind("fila_team", exchangeName, "team");
+
                 int messagesPerSecond = 5;
                 long delay = 1000 / messagesPerSecond;
 
@@ -46,7 +55,6 @@ public class MessageGenerator {
                     }
 
                     channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
-                    System.out.println("[ENVIADO] " + message);
 
                     Thread.sleep(delay);
                 }
@@ -57,16 +65,22 @@ public class MessageGenerator {
         }
     }
 
-    private static String generateMessage() {
+    private static String generateMessage() throws Exception {
         boolean tipoPessoa = random.nextBoolean();
-        String imagemEscolhida;
+        File imagemArquivo;
 
         if (tipoPessoa) {
-            imagemEscolhida = rostos[random.nextInt(rostos.length)].getName();
-            return "Tipo: Rosto de pessoa | Imagem: " + imagemEscolhida + " | Timestamp: " + System.currentTimeMillis();
+            imagemArquivo = rostos[random.nextInt(rostos.length)];
         } else {
-            imagemEscolhida = times[random.nextInt(times.length)].getName();
-            return "Tipo: Brasão de time | Imagem: " + imagemEscolhida + " | Timestamp: " + System.currentTimeMillis();
+            imagemArquivo = times[random.nextInt(times.length)];
         }
+
+        String nomeArquivo = imagemArquivo.getName();
+        System.out.println("Imagem: " + nomeArquivo + " | Timestamp: " + System.currentTimeMillis());
+
+        byte[] bytes = Files.readAllBytes(imagemArquivo.toPath());
+        String base64 = Base64.getEncoder().encodeToString(bytes);
+
+        return base64 + ":::" + nomeArquivo;
     }
 }
