@@ -45,12 +45,10 @@ public class MessageGenerator {
                 long delay = 1000 / messagesPerSecond;
 
                 while (true) {
-                    String[] resultado = generateMessage();
-                    String message = resultado[0];     // Base64
-                    String nomeArquivo = resultado[1]; // nome do arquivo
+                    String message = generateMessage();
 
                     String routingKey;
-                    if (nomeArquivo.contains("feliz") || nomeArquivo.contains("triste")) {
+                    if (message.contains("feliz") || message.contains("triste")) {
                         routingKey = "face";  // é rosto de pessoa
                     } else {
                         routingKey = "team";  // é brasão de time
@@ -67,7 +65,7 @@ public class MessageGenerator {
         }
     }
 
-    private static String[] generateMessage() throws Exception {
+    private static String generateMessage() throws Exception {
         boolean tipoPessoa = random.nextBoolean();
         File imagemArquivo;
 
@@ -83,6 +81,6 @@ public class MessageGenerator {
         byte[] bytes = Files.readAllBytes(imagemArquivo.toPath());
         String base64 = Base64.getEncoder().encodeToString(bytes);
 
-        return new String[] {base64, nomeArquivo};
+        return base64 + ":::" + nomeArquivo;
     }
 }

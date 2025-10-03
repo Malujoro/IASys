@@ -39,15 +39,18 @@ public class SentimentConsumer {
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             try {
                 byte[] body = delivery.getBody();
+                String message = new String(body);
 
-                // Decodifica Base64 enviado pelo gerador
-                String base64 = new String(body);
+                String[] parts = message.split(":::");
+                String base64 = parts[0];
+                String nomeArquivo = parts[1];
+
                 byte[] imageBytes = Base64.getDecoder().decode(base64);
 
                 // Converte para BufferedImage
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
                 String prediction = model.predict(img);
-                System.out.println("[Sentimento Detectado] " + prediction);
+                System.out.println("[Sentimento Esperado] " + nomeArquivo + " | " + "[Sentimento Detectado]" + prediction);
             }  catch (Exception e) {
                 System.err.println("Erro ao processar a imagem: " + e.getMessage());
                 e.printStackTrace();

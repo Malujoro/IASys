@@ -6,13 +6,14 @@ WORKDIR /app
 COPY pom.xml .
 
 # 2. Baixa dependências (cacheável)
-RUN mvn dependency:go-offline -B
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -B
 
 # 3. Copia o código fonte só depois
 COPY src ./src
 
 # 4. Compila e gera o JAR com dependências
-RUN mvn clean package assembly:single -B
+RUN --mount=type=cache,target=/root/.m2 mvn clean package assembly:single -B
+
 
 # Stage 2: runtime leve
 FROM openjdk:17-jdk-slim
