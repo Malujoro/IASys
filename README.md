@@ -94,16 +94,16 @@ flowchart LR
 
 ### Gerador de Mensagens
 ```
-[ENVIADO] Tipo: Rosto de pessoa | Imagem: feliz1.jpg | Timestamp: 1696200000000
-[ENVIADO] Tipo: Brasão de time | Imagem: time2.png | Timestamp: 1696200000500
+Imagem: feliz1.png | Timestamp: 1759519066567
+Imagem: Marte.png | Timestamp: 1759519066361
 ```
 
 ### Consumer Face
 ```
-[RECEBIDO] feliz1.jpg → Classificação: Pessoa está FELIZ 😃
+[Sentimento Esperado] feliz1.png | [Sentimento Detectado] Feliz 😃
 ```
 
 ### Consumer Team
 ```
-[RECEBIDO] time2.png → Classificação: Time identificado: Flamengo 🟥⬛
+[Time Esperado] Mercurio.png | [Time Detectado] MercurioFC
 ```
