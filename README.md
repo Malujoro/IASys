@@ -1,8 +1,16 @@
+
+
 # ⚡ Sistema Distribuído com RabbitMQ, Java e IA
 
 Este projeto implementa um **sistema distribuído em containers Docker** que utiliza **RabbitMQ como broker de mensagens** e dois consumidores com inteligência artificial embarcada usando a biblioteca **Smile**.  
 
 O sistema gera uma carga constante de mensagens (imagens fictícias de rostos e brasões de times de futebol), roteia via RabbitMQ e processa em dois serviços consumidores distintos.  
+
+---
+
+## 🎥 Demonstração
+
+👉 [Assista no YouTube](https://youtu.be/6OCJDhu0gUk)
 
 ---
 
