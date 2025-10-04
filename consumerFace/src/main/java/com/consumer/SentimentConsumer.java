@@ -50,7 +50,7 @@ public class SentimentConsumer {
                 // Converte para BufferedImage
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
                 String prediction = model.predict(img);
-                System.out.println("[Sentimento Esperado] " + nomeArquivo + " | " + "[Sentimento Detectado]" + prediction);
+                System.out.println("[Sentimento Esperado] " + nomeArquivo + " | " + "[Sentimento Detectado] " + prediction);
                 Thread.sleep(5000);
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }  catch (Exception e) {
